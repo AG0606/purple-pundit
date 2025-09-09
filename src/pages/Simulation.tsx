@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Clock, MessageSquare, Target, BarChart } from "lucide-react";
+import { ArrowLeft, Clock, MessageSquare, Target, BarChart, Plus } from "lucide-react";
 import VoiceIndicator from "@/components/simulation/VoiceIndicator";
 import TypewriterText from "@/components/simulation/TypewriterText";
 import StickyNotes from "@/components/simulation/StickyNotes";
@@ -274,20 +274,47 @@ const Simulation = () => {
                       <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
                       <p>Transcript will appear here as the debate progresses...</p>
                     </div>
-                  ) : (
+                   ) : (
                     messages.map((message) => (
-                      <div key={message.id} className="space-y-2">
+                      <div key={message.id} className="space-y-2 group">
                         <div className="flex items-center justify-between">
                           <Badge variant={message.speaker === 'AI' ? 'default' : 'secondary'}>
                             {message.speaker === 'AI' ? 'AI Opponent' : 'You'}
                           </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {message.timestamp}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                if ((window as any).addTranscriptToNotes) {
+                                  (window as any).addTranscriptToNotes(message.id, message.content, message.speaker);
+                                }
+                              }}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 p-0 hover:bg-primary hover:text-primary-foreground"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </Button>
+                            <span className="text-xs text-muted-foreground">
+                              {message.timestamp}
+                            </span>
+                          </div>
                         </div>
-                        <p className="text-sm leading-relaxed p-3 rounded-lg bg-muted/30 border-l-4 border-l-accent">
-                          {message.content}
-                        </p>
+                        <div className="relative">
+                          <p className="text-sm leading-relaxed p-3 rounded-lg bg-muted/30 border-l-4 border-l-accent hover:bg-muted/40 transition-colors cursor-pointer"
+                             onClick={() => {
+                               if ((window as any).addTranscriptToNotes) {
+                                 (window as any).addTranscriptToNotes(message.id, message.content, message.speaker);
+                               }
+                             }}
+                          >
+                            {message.content}
+                          </p>
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Badge variant="outline" className="text-xs bg-background/80">
+                              Click to add to notes
+                            </Badge>
+                          </div>
+                        </div>
                       </div>
                     ))
                   )}
@@ -332,7 +359,11 @@ const Simulation = () => {
             </Card>
 
             {/* Sticky Notes */}
-            <StickyNotes />
+            <StickyNotes onAddFromTranscript={(transcriptId, content, speaker) => {
+              // This creates a bridge between transcript and notes
+              const note = `${speaker === 'AI' ? 'AI Point' : 'My Argument'}: ${content}`;
+              toast.success(`Added ${speaker} response to notes!`);
+            }} />
           </div>
         </div>
       </div>
