@@ -139,11 +139,11 @@ const SimulationSetup = ({ open, onOpenChange }: SimulationSetupProps) => {
                     <SelectValue placeholder="Select duration" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="2">2 minutes</SelectItem>
                     <SelectItem value="5">5 minutes</SelectItem>
                     <SelectItem value="10">10 minutes</SelectItem>
                     <SelectItem value="15">15 minutes</SelectItem>
                     <SelectItem value="20">20 minutes</SelectItem>
-                    <SelectItem value="30">30 minutes</SelectItem>
                   </SelectContent>
                 </Select>
               </CardContent>
