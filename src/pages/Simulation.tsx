@@ -154,11 +154,11 @@ const Simulation = () => {
     setIsAISpeaking(false);
     setIsUserMuted(true);
     
-    // Check if simulation qualifies for report (2+ minutes, 2+ user messages)
+    // Check if simulation qualifies for report (1+ minutes, 1+ user messages)
     const userMessages = messages.filter(m => m.speaker === 'User').length;
     const simulationDuration = duration * 60 - timeRemaining;
     
-    if (simulationDuration >= 120 && userMessages >= 2) {
+    if (simulationDuration >= 60 && userMessages >= 1) {
       toast.success("Generating your debate analysis report...");
       // Navigate to report page
       setTimeout(() => {
@@ -166,12 +166,14 @@ const Simulation = () => {
           topic,
           duration: simulationDuration.toString(),
           userMessages: userMessages.toString(),
-          transcript: JSON.stringify(messages)
+          transcript: JSON.stringify(messages),
+          userRole,
+          difficulty
         });
         navigate(`/report?${reportParams}`);
       }, 2000);
     } else {
-      toast.info("Simulation too short for analysis. Need 2+ minutes and 2+ responses.");
+      toast.info("Simulation too short for analysis. Need 1+ minutes and 1+ responses.");
     }
   };
 

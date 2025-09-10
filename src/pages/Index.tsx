@@ -1,15 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mic, Users, Trophy, Sparkles, ArrowRight, Play } from "lucide-react";
+import { Mic, Users, Trophy, Sparkles, ArrowRight, Play, History } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import AuthDialog from "@/components/auth/AuthDialog";
 import SimulationSetup from "@/components/simulation/SimulationSetup";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isSetupOpen, setIsSetupOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [sessionCount, setSessionCount] = useState(0);
+
+  useEffect(() => {
+    // Load session count from localStorage
+    try {
+      const sessions = JSON.parse(localStorage.getItem('debateSessions') || '[]');
+      setSessionCount(sessions.length);
+    } catch (error) {
+      setSessionCount(0);
+    }
+  }, []);
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
@@ -54,13 +67,24 @@ const Index = () => {
             <span className="text-xl font-bold text-foreground">DebateCoach</span>
           </div>
           
-          <Button 
-            variant="outline" 
-            onClick={() => setIsAuthOpen(true)}
-            className="hover:bg-primary hover:text-primary-foreground transition-smooth"
-          >
-            Sign In
-          </Button>
+          <div className="flex gap-4">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/history')}
+              className="border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all duration-300"
+            >
+              <History className="w-5 h-5 mr-2" />
+              View History ({sessionCount})
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={() => setIsAuthOpen(true)}
+              className="hover:bg-primary hover:text-primary-foreground transition-smooth"
+            >
+              Sign In
+            </Button>
+          </div>
         </div>
       </nav>
 
@@ -91,6 +115,18 @@ const Index = () => {
               Start Practicing
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
+            
+            {sessionCount > 0 && (
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => navigate('/history')}
+                className="hover:bg-primary hover:text-primary-foreground transition-smooth text-lg px-8 py-6"
+              >
+                <History className="w-5 h-5 mr-2" />
+                View History ({sessionCount})
+              </Button>
+            )}
             
             <Button 
               variant="outline" 
