@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Clock, Users, Target, Sparkles, Play } from "lucide-react";
+import { Clock, Users, Target, Sparkles, Play, BookOpen, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -23,6 +23,7 @@ const SimulationSetup = ({ open, onOpenChange }: SimulationSetupProps) => {
   const [duration, setDuration] = useState("15");
   const [userRole, setUserRole] = useState("pro");
   const [difficulty, setDifficulty] = useState("intermediate");
+  const [wantsResources, setWantsResources] = useState(false);
 
   const suggestedTopics = [
     "Should artificial intelligence replace human teachers?",
@@ -38,18 +39,33 @@ const SimulationSetup = ({ open, onOpenChange }: SimulationSetupProps) => {
       return;
     }
 
-    toast.success("Starting your debate simulation!");
-    
-    // Navigate to simulation window with parameters
-    const params = new URLSearchParams({
-      topic: topic.trim(),
-      duration,
-      userRole,
-      difficulty
-    });
-    
-    navigate(`/simulation?${params}`);
-    onOpenChange(false);
+    if (wantsResources) {
+      toast.success("Getting resources for your topic!");
+      
+      // Navigate to resources page first
+      const params = new URLSearchParams({
+        topic: topic.trim(),
+        duration,
+        userRole,
+        difficulty
+      });
+      
+      navigate(`/resources?${params}`);
+      onOpenChange(false);
+    } else {
+      toast.success("Starting your debate simulation!");
+      
+      // Navigate directly to simulation
+      const params = new URLSearchParams({
+        topic: topic.trim(),
+        duration,
+        userRole,
+        difficulty
+      });
+      
+      navigate(`/simulation?${params}`);
+      onOpenChange(false);
+    }
   };
 
   const handleTopicSelect = (selectedTopic: string) => {
@@ -180,6 +196,47 @@ const SimulationSetup = ({ open, onOpenChange }: SimulationSetupProps) => {
             </CardContent>
           </Card>
 
+          {/* Resources Option */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-primary" />
+                Research Resources
+              </CardTitle>
+              <CardDescription>
+                Get curated resources and materials for your topic before starting
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <p className="text-sm text-muted-foreground">
+                    Would you like to review research materials and sources before the debate?
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant={wantsResources ? "outline" : "default"}
+                    size="sm"
+                    onClick={() => setWantsResources(false)}
+                    className="h-8 px-3 text-xs"
+                  >
+                    Skip
+                  </Button>
+                  <Button
+                    variant={wantsResources ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setWantsResources(true)}
+                    className="h-8 px-3 text-xs"
+                  >
+                    <ExternalLink className="w-3 h-3 mr-1" />
+                    Get Resources
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Separator />
 
           {/* Start Button */}
@@ -189,8 +246,8 @@ const SimulationSetup = ({ open, onOpenChange }: SimulationSetupProps) => {
               onClick={handleStartSimulation}
               className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-primary px-8 py-6 text-lg"
             >
-              <Play className="w-5 h-5 mr-2" />
-              Start Debate Simulation
+              {wantsResources ? <BookOpen className="w-5 h-5 mr-2" /> : <Play className="w-5 h-5 mr-2" />}
+              {wantsResources ? "Get Resources First" : "Start Debate Simulation"}
             </Button>
           </div>
         </div>

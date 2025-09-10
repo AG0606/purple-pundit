@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { StickyNote, Plus, X, Quote, Pin, Search, Filter, BookOpen, Clock } from "lucide-react";
+import { StickyNote, Plus, X, Quote, Pin, Search, Filter, BookOpen, Clock, Star, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 interface Note {
@@ -16,7 +16,16 @@ interface Note {
   transcriptSpeaker?: 'AI' | 'User';
   tags?: string[];
   isPinned?: boolean;
-  category?: 'argument' | 'counterpoint' | 'evidence' | 'question' | 'insight';
+  category?: 'argument' | 'counterpoint' | 'evidence' | 'question' | 'insight' | 'resource';
+}
+
+interface StarredResource {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  type: string;
+  source: string;
 }
 
 interface StickyNotesProps {
@@ -31,6 +40,7 @@ const StickyNotes = ({ className = "", onAddFromTranscript }: StickyNotesProps) 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isCompactView, setIsCompactView] = useState(false);
+  const [starredResources, setStarredResources] = useState<StarredResource[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const addNote = (
@@ -80,6 +90,27 @@ const StickyNotes = ({ className = "", onAddFromTranscript }: StickyNotesProps) 
     toast.success(`Added ${speaker} response to notes!`);
   };
 
+  // Load starred resources from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('starredResources');
+    if (stored) {
+      try {
+        const resources = JSON.parse(stored);
+        setStarredResources(resources);
+        
+        // Add starred resources as notes
+        resources.forEach((resource: StarredResource) => {
+          const existingNote = notes.find(note => note.content.includes(resource.title));
+          if (!existingNote) {
+            addResourceNote(resource);
+          }
+        });
+      } catch (error) {
+        console.error('Error loading starred resources:', error);
+      }
+    }
+  }, []);
+
   // Expose function to parent component
   useEffect(() => {
     if (onAddFromTranscript) {
@@ -87,6 +118,25 @@ const StickyNotes = ({ className = "", onAddFromTranscript }: StickyNotesProps) 
       (window as any).addTranscriptToNotes = addFromTranscript;
     }
   }, [onAddFromTranscript]);
+
+  const addResourceNote = (resource: StarredResource) => {
+    const note: Note = {
+      id: `resource-${resource.id}`,
+      content: `📚 Resource: ${resource.title}`,
+      timestamp: new Date().toLocaleTimeString(),
+      fromTranscript: false,
+      category: 'resource',
+      isPinned: true,
+      tags: [resource.type, resource.source]
+    };
+    
+    setNotes(prev => {
+      // Check if resource note already exists
+      const exists = prev.find(n => n.id === note.id);
+      if (exists) return prev;
+      return [note, ...prev];
+    });
+  };
 
   // Filter notes based on search and category
   const filteredNotes = notes.filter(note => {
@@ -109,7 +159,8 @@ const StickyNotes = ({ className = "", onAddFromTranscript }: StickyNotesProps) 
     { value: 'counterpoint', label: 'Counterpoints', icon: X },
     { value: 'evidence', label: 'Evidence', icon: Quote },
     { value: 'question', label: 'Questions', icon: Search },
-    { value: 'insight', label: 'Insights', icon: StickyNote }
+    { value: 'insight', label: 'Insights', icon: StickyNote },
+    { value: 'resource', label: 'Resources', icon: Star }
   ];
 
   return (
@@ -306,6 +357,30 @@ const StickyNotes = ({ className = "", onAddFromTranscript }: StickyNotesProps) 
                     <p className={`leading-relaxed whitespace-pre-wrap ${isCompactView ? 'text-xs' : 'text-sm'}`}>
                       {note.content}
                     </p>
+                    
+                    {note.category === 'resource' && (
+                      <div className="mt-2">
+                        {starredResources
+                          .filter(resource => note.content.includes(resource.title))
+                          .map(resource => (
+                            <div key={resource.id} className="flex items-center gap-2 mt-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => window.open(resource.url, '_blank')}
+                                className="h-6 px-2 text-xs"
+                              >
+                                <ExternalLink className="w-3 h-3 mr-1" />
+                                Open
+                              </Button>
+                              <Badge variant="outline" className="text-xs">
+                                {resource.source}
+                              </Badge>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    )}
                     
                     {note.transcriptText && !isCompactView && (
                       <div className="mt-2 p-2 bg-muted/30 rounded text-xs text-muted-foreground border-l-2 border-accent/50">
