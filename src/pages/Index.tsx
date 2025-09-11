@@ -89,21 +89,30 @@ const Index = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="py-20 px-6">
-        <div className="container mx-auto text-center max-w-4xl">
+      <section className="py-20 px-6 relative overflow-hidden">
+        <div className="container mx-auto text-center max-w-6xl relative">
           <Badge className="mb-6 bg-gradient-primary text-primary-foreground shadow-glow">
             AI-Powered Debate Training
           </Badge>
           
           <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 animate-fade-in-up">
             Master the Art of
-            <span className="text-foreground"> Debate</span>
+            <span className="bg-gradient-primary bg-clip-text text-transparent"> Debate</span>
           </h1>
           
           <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-in-up">
             Elevate your debating skills with our advanced AI coach. Practice real-time debates, 
             receive instant feedback, and track your progress like never before.
           </p>
+
+          {/* AI Debate Visualization */}
+          <div className="mb-12 relative">
+            <img 
+              src="/lovable-uploads/6b593b0c-7cbf-4c0a-9343-a252926c1d14.png"
+              alt="AI Debate Interface showing two debate opponents with neural network visualization"
+              className="w-full max-w-4xl mx-auto rounded-2xl shadow-glow"
+            />
+          </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up">
             <Button 

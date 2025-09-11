@@ -154,26 +154,53 @@ const Simulation = () => {
     setIsAISpeaking(false);
     setIsUserMuted(true);
     
-    // Check if simulation qualifies for report (1+ minutes, 1+ user messages)
+    // Check if simulation qualifies for storage (1+ minutes, 1+ user messages)
     const userMessages = messages.filter(m => m.speaker === 'User').length;
     const simulationDuration = duration * 60 - timeRemaining;
     
     if (simulationDuration >= 60 && userMessages >= 1) {
-      toast.success("Generating your debate analysis report...");
-      // Navigate to report page
+      // Generate session data and save to localStorage
+      const sessionData = {
+        id: Date.now().toString(),
+        topic,
+        duration: simulationDuration,
+        userRole,
+        difficulty,
+        transcript: messages,
+        analysis: {
+          argumentStrength: Math.floor(Math.random() * 40 + 60), // 60-100%
+          evidenceUsage: Math.floor(Math.random() * 40 + 60),
+          logicalStructure: Math.floor(Math.random() * 40 + 60),
+          counterargumentHandling: Math.floor(Math.random() * 40 + 60),
+          overallPerformance: Math.floor(Math.random() * 40 + 60)
+        },
+        feedback: [
+          "Strong opening argument with clear position",
+          "Good use of evidence to support claims",
+          "Could improve on addressing counterarguments"
+        ],
+        recommendations: [
+          "Practice more complex logical structures",
+          "Work on faster response times",
+          "Develop stronger rebuttal techniques"
+        ],
+        createdAt: new Date().toISOString()
+      };
+      
+      // Save to localStorage
+      const existingSessions = JSON.parse(localStorage.getItem('debateSessions') || '[]');
+      existingSessions.push(sessionData);
+      localStorage.setItem('debateSessions', JSON.stringify(existingSessions));
+      
+      toast.success("Debate session saved! Redirecting to history...");
       setTimeout(() => {
-        const reportParams = new URLSearchParams({
-          topic,
-          duration: simulationDuration.toString(),
-          userMessages: userMessages.toString(),
-          transcript: JSON.stringify(messages),
-          userRole,
-          difficulty
-        });
-        navigate(`/report?${reportParams}`);
+        navigate('/history');
       }, 2000);
     } else {
       toast.info("Simulation too short for analysis. Need 1+ minutes and 1+ responses.");
+      setTimeout(() => {
+        navigate('/history');
+      }, 1500);
     }
   };
 
